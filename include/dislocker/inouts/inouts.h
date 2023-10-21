@@ -37,11 +37,13 @@ typedef struct _data dis_iodata_t;
 /**
  * Function to get the volume's size
  */
+DISLOCKER_API
 uint64_t dis_inouts_volume_size(dis_context_t dis_ctx);
 
 /**
  * Function to get the volume's sector size
  */
+DISLOCKER_API
 uint16_t dis_inouts_sector_size(dis_context_t dis_ctx);
 
 

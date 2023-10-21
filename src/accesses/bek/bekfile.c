@@ -302,7 +302,7 @@ int get_bek_dataset(int fd, void** bek_dataset)
 	size_t rest = dataset.size - sizeof(bitlocker_dataset_t);
 
 	/* Read the data included in the dataset */
-	nb_read = dis_read(fd, *bek_dataset + sizeof(bitlocker_dataset_t), rest);
+	nb_read = dis_read(fd, (char*)*bek_dataset + sizeof(bitlocker_dataset_t), rest);
 
 	// Check if we read all we wanted
 	if((size_t) nb_read != rest)

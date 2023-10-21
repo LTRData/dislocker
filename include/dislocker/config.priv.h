@@ -93,7 +93,7 @@ typedef struct _dis_cfg {
 	 * Begin to read the BitLocker volume at this offset, making this offset the
 	 * zero-one
 	 */
-	off_t         offset;
+	off64_t         offset;
 	/*
 	 * Various flags one can use. See dis_flags_e enum above for possible values
 	 */

@@ -38,7 +38,7 @@
 #include "dislocker/common.h"
 #include "dislocker/dislocker.h"
 
-#if defined(__DARWIN) || defined(__FREEBSD)
+#if defined(__DARWIN) || defined(__FREEBSD) || defined(_WIN32)
 #  define O_LARGEFILE 0
 #endif /* __DARWIN || __FREEBSD */
 

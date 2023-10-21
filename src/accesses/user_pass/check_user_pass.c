@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <dislocker/common.h>
+
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "user_pass.h"
+#include "dislocker/accesses/user_pass/user_pass.h"
 
 
 static char* ck_password = "TestPassword123!";
@@ -87,7 +89,7 @@ START_TEST (check_prompt_up)
 	if(ret != 0)
 		ck_abort_msg("Child failed: %s", strerror(ret));
 }
-END_TEST
+//END_TEST
 
 
 // int user_key(const uint8_t *user_password, const uint8_t *salt, uint8_t *result_key);
@@ -123,7 +125,7 @@ START_TEST (check_user_key)
 
 	dis_free(result_key);
 }
-END_TEST
+//END_TEST
 
 
 /*
@@ -140,13 +142,13 @@ START_TEST (check_user_key_nullargs)
 
 	free(uint8_notnull);
 }
-END_TEST
+//END_TEST
 
 START_TEST (check_prompt_up_nullargs)
 {
 	ck_assert_int_eq(prompt_up(NULL), FALSE);
 }
-END_TEST
+//END_TEST
 
 
 /*

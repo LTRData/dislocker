@@ -36,7 +36,7 @@
  * On Darwin and FreeBSD, files are opened using 64 bits offsets/variables
  * and O_LARGEFILE isn't defined
  */
-#if defined(__DARWIN) || defined(__FREEBSD)
+#if defined(__DARWIN) || defined(__FREEBSD) || defined(_WIN32)
 #  define O_LARGEFILE 0
 #endif /* __DARWIN || __FREEBSD */
 
@@ -46,35 +46,35 @@
 static int get_volume_header(
 	volume_header_t *volume_header,
 	int fd,
-	off_t partition_offset
+	off64_t partition_offset
 );
 
 static int check_volume_header(
 	dis_metadata_t dis_metadata,
 	int volume_fd,
-	off_t disk_offset
+	off64_t disk_offset
 );
 
 static int begin_compute_regions(
 	volume_header_t* vh,
 	int fd,
-	off_t disk_offset,
+	off64_t disk_offset,
 	dis_regions_t* regions
 );
 
 static int end_compute_regions(dis_metadata_t dis_meta);
 
-static int get_metadata(off_t source, void **metadata, int fd);
+static int get_metadata(off64_t source, void **metadata, int fd);
 
 static int get_dataset(void* metadata, bitlocker_dataset_t** dataset);
 
-static int get_eow_information(off_t source, void** eow_infos, int fd);
+static int get_eow_information(off64_t source, void** eow_infos, int fd);
 
 static int get_metadata_lazy_checked(
 	volume_header_t* volume_header,
 	int fd,
 	void** metadata,
-	off_t disk_offset,
+	off64_t disk_offset,
 	unsigned char force_block,
 	dis_regions_t *regions
 );
@@ -83,7 +83,7 @@ static int get_eow_check_valid(
 	volume_header_t *volume_header,
 	int fd,
 	void **eow_infos,
-	off_t disk_offset
+	off64_t disk_offset
 );
 
 
@@ -167,9 +167,13 @@ int dis_metadata_initialize(dis_metadata_t dis_meta)
 	//Windows 10 1903 exFAT
 	if (!dis_meta->volume_header->sector_size) {
 		uint64_t nSectorSize = 0;
+#ifdef _WIN32
+		nSectorSize = 512;
+#else
 		ioctl(dis_meta_cfg->fve_fd, BLKSSZGET, &nSectorSize);
-		if(!nSectorSize)
+		if (!nSectorSize)
 			nSectorSize = 512;
+#endif
 		dis_meta->volume_header->sector_size = (uint16_t)nSectorSize;
 	}
 	//Windows 10 1903 exFAT
@@ -307,7 +311,7 @@ int dis_metadata_destroy(dis_metadata_t dis_meta)
  * @param offset The initial partition offset
  * @return TRUE if result can be trusted, FALSE otherwise
  */
-static int get_volume_header(volume_header_t *volume_header, int fd, off_t offset)
+static int get_volume_header(volume_header_t *volume_header, int fd, off64_t offset)
 {
 	if(!volume_header || fd < 0)
 		return FALSE;
@@ -337,7 +341,7 @@ static int get_volume_header(volume_header_t *volume_header, int fd, off_t offse
  * @return V_VISTA or V_SEVEN according to the version found, or -1 if not
  * recognized
  */
-static inline int get_version_from_volume_header(volume_header_t *volume_header)
+static __inline int get_version_from_volume_header(volume_header_t *volume_header)
 {
 	if(memcmp(BITLOCKER_SIGNATURE, volume_header->signature,
 	          BITLOCKER_SIGNATURE_SIZE) == 0)
@@ -360,7 +364,7 @@ static inline int get_version_from_volume_header(volume_header_t *volume_header)
  * @param disk_offset The offset of the beginning of the volume
  * @return TRUE if result can be trusted, FALSE otherwise
  */
-static int check_volume_header(dis_metadata_t dis_meta, int volume_fd, off_t disk_offset)
+static int check_volume_header(dis_metadata_t dis_meta, int volume_fd, off64_t disk_offset)
 {
 	if(!dis_meta || volume_fd < 0)
 		return FALSE;
@@ -419,7 +423,7 @@ static int check_volume_header(dis_metadata_t dis_meta, int volume_fd, off_t dis
 		dis_printf(L_INFO, "Volume has EOW_INFORMATION_OFFSET_GUID.\n");
 
 		// First: get the EOW informations no matter what
-		off_t source = (off_t) volume_header->eow_information_off[0];
+		off64_t source = (off64_t) volume_header->eow_information_off[0];
 		void* eow_infos = NULL;
 
 		if(get_eow_information(source, &eow_infos, volume_fd))
@@ -485,7 +489,7 @@ static int check_volume_header(dis_metadata_t dis_meta, int volume_fd, off_t dis
  */
 static int begin_compute_regions(volume_header_t* vh,
                           int fd,
-                          off_t disk_offset,
+                          off64_t disk_offset,
                           dis_regions_t* regions)
 {
 	// Check parameters
@@ -529,7 +533,7 @@ static int begin_compute_regions(volume_header_t* vh,
 		/* Now that we have the first offset, go get the others */
 		bitlocker_information_t* information = NULL;
 		if(!get_metadata(
-				(off_t) new_offset + disk_offset,
+				(off64_t) new_offset + disk_offset,
 				(void**) &information, fd
 			))
 			return FALSE;
@@ -646,7 +650,7 @@ static int end_compute_regions(dis_metadata_t dis_meta)
 			regions[4].size = information->convert_size;
 		}
 
-		dis_meta->virtualized_size = (off_t)datum->nb_bytes;
+		dis_meta->virtualized_size = (off64_t)datum->nb_bytes;
 
 		dis_printf(
 			L_DEBUG,
@@ -687,7 +691,7 @@ static int end_compute_regions(dis_metadata_t dis_meta)
  * @param fd A file descriptor to the volume
  * @return TRUE if result can be trusted, FALSE otherwise
  */
-static int get_metadata(off_t source, void **metadata, int fd)
+static int get_metadata(off64_t source, void **metadata, int fd)
 {
 	if(!source || fd < 0 || !metadata)
 		return FALSE;
@@ -738,7 +742,7 @@ static int get_metadata(off_t source, void **metadata, int fd)
 	dis_printf(L_DEBUG, "Reading data...\n");
 
 	// Read the rest, the real data
-	nb_read = dis_read(fd, *metadata + sizeof(bitlocker_information_t), rest_size);
+	nb_read = dis_read(fd, (char*)*metadata + sizeof(bitlocker_information_t), rest_size);
 
 	// Check if we read all we wanted
 	if((size_t) nb_read != rest_size)
@@ -795,7 +799,7 @@ static int get_dataset(void* metadata, bitlocker_dataset_t** dataset)
  * @param fd A file descriptor to the volume
  * @return TRUE if result can be trusted, FALSE otherwise
  */
-static int get_eow_information(off_t source, void** eow_infos, int fd)
+static int get_eow_information(off64_t source, void** eow_infos, int fd)
 {
 	if(!source || fd < 0 || !eow_infos)
 		return FALSE;
@@ -841,7 +845,7 @@ static int get_eow_information(off_t source, void** eow_infos, int fd)
 	dis_printf(L_DEBUG, "Reading EOW information's payload...\n");
 
 	// Read the rest, the payload
-	nb_read = dis_read(fd, *eow_infos + sizeof(bitlocker_eow_infos_t), rest_size);
+	nb_read = dis_read(fd, (char*)*eow_infos + sizeof(bitlocker_eow_infos_t), rest_size);
 
 	// Check if we read all we wanted
 	if((size_t) nb_read != rest_size)
@@ -872,7 +876,7 @@ static int get_eow_information(off_t source, void** eow_infos, int fd)
  * @return TRUE if result can be trusted, FALSE otherwise
  */
 static int get_metadata_lazy_checked(
-	volume_header_t *volume_header, int fd, void **metadata, off_t disk_offset,
+	volume_header_t *volume_header, int fd, void **metadata, off64_t disk_offset,
 	unsigned char force_block, dis_regions_t *regions)
 {
 	// Check parameters
@@ -885,7 +889,7 @@ static int get_metadata_lazy_checked(
 	unsigned int  metadata_size = 0;
 	unsigned char current = 0;
 	unsigned int  metadata_crc32 = 0;
-	off_t         validations_offset = 0;
+	off64_t         validations_offset = 0;
 	bitlocker_validations_t validations;
 
 	/* If the user wants a specific metadata block */
@@ -893,7 +897,7 @@ static int get_metadata_lazy_checked(
 	{
 		dis_printf(L_INFO, "Obtaining block n°%d, forced by user...\n", force_block);
 		// Get the metadata
-		if(!get_metadata((off_t)regions[force_block-1].addr + disk_offset, metadata, fd))
+		if(!get_metadata((off64_t)regions[force_block-1].addr + disk_offset, metadata, fd))
 		{
 			dis_printf(L_ERROR, "Can't get metadata (n°%d, forced by user)\n", force_block);
 			return FALSE;
@@ -907,7 +911,7 @@ static int get_metadata_lazy_checked(
 	while(current < 3)
 	{
 		/* Get the metadata */
-		if(!get_metadata((off_t)regions[current].addr + disk_offset, metadata, fd))
+		if(!get_metadata((off64_t)regions[current].addr + disk_offset, metadata, fd))
 		{
 			/*
 			dis_printf(L_ERROR, "Can't get metadata (n°%d)\n", current+1);
@@ -928,7 +932,7 @@ static int get_metadata_lazy_checked(
 		metadata_size = (unsigned int)(information->version == V_SEVEN ?
 		            ((unsigned int)information->size) << 4 : information->size);
 
-		validations_offset = (off_t)regions[current].addr + metadata_size;
+		validations_offset = (off64_t)regions[current].addr + metadata_size;
 
 		dis_printf(
 			L_DEBUG,
@@ -993,7 +997,7 @@ static int get_metadata_lazy_checked(
  * @return TRUE if result can be trusted, FALSE otherwise
  */
 static int get_eow_check_valid(
-	volume_header_t *volume_header, int fd, void **eow_infos, off_t disk_offset)
+	volume_header_t *volume_header, int fd, void **eow_infos, off64_t disk_offset)
 {
 	// Check parameters
 	if(!volume_header || fd < 0 || !eow_infos)
@@ -1005,7 +1009,7 @@ static int get_eow_check_valid(
 	unsigned char current = 0;
 	unsigned int  eow_infos_size = 0;
 	unsigned int  computed_crc32 = 0;
-	off_t         curr_offset = 0;
+	off64_t         curr_offset = 0;
 	int           payload_size = 0;
 
 	unsigned char* crc_temp_buffer;
@@ -1013,7 +1017,7 @@ static int get_eow_check_valid(
 	while(current < 2)
 	{
 		/* Compute the on-disk offset */
-		curr_offset = (off_t)volume_header->eow_information_off[current]
+		curr_offset = (off64_t)volume_header->eow_information_off[current]
 		            + disk_offset;
 		++current;
 
@@ -1195,22 +1199,22 @@ void dis_metadata_vista_vbr_ntfs2fve(dis_metadata_t dis_meta, void* vbr)
 
 
 int dis_metadata_is_overwritten(
-	dis_metadata_t dis_meta, off_t offset, size_t size)
+	dis_metadata_t dis_meta, off64_t offset, size_t size)
 {
 	if(!dis_meta)
 		return DIS_RET_ERROR_DISLOCKER_INVAL;
 
-	off_t metadata_offset = 0;
-	off_t metadata_size   = 0;
+	off64_t metadata_offset = 0;
+	off64_t metadata_size   = 0;
 	size_t virt_loop      = 0;
 
 	for(virt_loop = 0; virt_loop < dis_meta->nb_virt_region; virt_loop++)
 	{
-		metadata_size = (off_t)dis_meta->virt_region[virt_loop].size;
+		metadata_size = (off64_t)dis_meta->virt_region[virt_loop].size;
 		if(metadata_size == 0)
 			continue;
 
-		metadata_offset = (off_t)dis_meta->virt_region[virt_loop].addr;
+		metadata_offset = (off64_t)dis_meta->virt_region[virt_loop].addr;
 
 		if(offset >= metadata_offset &&
 		   offset < metadata_offset + metadata_size)
@@ -1221,7 +1225,7 @@ int dis_metadata_is_overwritten(
 		}
 
 		if(offset < metadata_offset &&
-		   offset + (off_t)size > metadata_offset)
+		   offset + (off64_t)size > metadata_offset)
 		{
 			dis_printf(L_DEBUG, "In metadata file (2:%#"
 			        F_OFF_T "+ %#" F_SIZE_T ")\n", offset, size);

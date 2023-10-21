@@ -37,7 +37,7 @@
 #include "dislocker/metadata/metadata_config.h"
 #include "dislocker/accesses/bek/bekfile.h"
 
-#define USAGE "Usage: %1$s [-h] [-f file.bek]\n" \
+#define USAGE "Usage: %s [-h] [-f file.bek]\n" \
               "  Reads .BEK files and prints information about them\n"
 
 
@@ -123,7 +123,7 @@ int main (int argc, char **argv)
 	print_dataset(L_INFO, dis_metadata);
 
 	/* external datum, which contains the decryption key */
-	print_one_datum(L_INFO, bek_dataset + 0x30);
+	print_one_datum(L_INFO, (char*)bek_dataset + 0x30);
 
 	dis_free(bek_dataset);
 	dis_metadata_destroy(dis_metadata);

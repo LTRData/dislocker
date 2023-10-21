@@ -290,7 +290,7 @@ int is_valid_key(const uint8_t *recovery_password, uint16_t *short_password)
 		return FALSE;
 
 	/* Begin by checking the length of the password */
-	if(strlen((char*)recovery_password) != 48+7)
+	if(strlen((char*)recovery_password) != (size_t)48+7)
 	{
 		dis_printf(
 			L_ERROR,
@@ -389,7 +389,7 @@ int intermediate_key(const uint8_t *recovery_password,
 	/* Just print it */
 	char s[NB_RP_BLOCS*2 * 5 + 1] = {0,};
 	for (loop = 0; loop < NB_RP_BLOCS*2; ++loop)
-		snprintf(&s[loop*5], 6, "0x%02hhx ", iresult[loop]);
+		_snprintf(&s[loop*5], 6, "0x%02hhx ", iresult[loop]);
 
 	dis_printf(L_DEBUG, "Distilled password: '%s\b'\n", s);
 
@@ -401,7 +401,13 @@ int intermediate_key(const uint8_t *recovery_password,
 	return TRUE;
 } // End intermediate_key
 
-
+#ifdef _WIN32
+int prompt_rp(uint8_t** rp)
+{
+	*rp = NULL;
+	return FALSE;
+}
+#else
 /**
  * Prompt for the recovery password to be entered
  *
@@ -575,7 +581,7 @@ int prompt_rp(uint8_t** rp)
 	close_input_fd();
 	return FALSE;
 }
-
+#endif
 
 /**
  * Print the result key which can be used to decrypt the associated VMK
@@ -590,7 +596,7 @@ void print_intermediate_key(uint8_t *result_key)
 	int loop = 0;
 	char s[32*3 + 1] = {0,};
 	for(loop = 0; loop < 32; ++loop)
-		snprintf(&s[loop*3], 4, "%02hhx ", result_key[loop]);
+		_snprintf(&s[loop*3], 4, "%02hhx ", result_key[loop]);
 
 	dis_printf(L_INFO, "Intermediate recovery key:\n\t%s\n", s);
 }

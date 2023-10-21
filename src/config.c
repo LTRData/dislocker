@@ -30,6 +30,7 @@
 #include "dislocker/dislocker.priv.h"
 
 
+int optind;
 
 
 
@@ -67,7 +68,7 @@ static void setbekfile(dis_context_t dis_ctx, char* optarg)
 }
 static void setforceblock(dis_context_t dis_ctx, char* optarg)
 {
-	off_t force;
+	off64_t force;
 	if(optarg)
 		force = (unsigned char) strtol(optarg, NULL, 10);
 	else
@@ -92,7 +93,7 @@ static void setlogfile(dis_context_t dis_ctx, char* optarg)
 }
 static void setoffset(dis_context_t dis_ctx, char* optarg)
 {
-	off_t offset = (off_t) strtoll(optarg, NULL, 10);
+	off64_t offset = (off64_t) strtoll(optarg, NULL, 10);
 	dis_setopt(dis_ctx, DIS_OPT_VOLUME_OFFSET, &offset);
 }
 static void setrecoverypwd(dis_context_t dis_ctx, char* optarg)
@@ -158,7 +159,6 @@ static struct _dis_options dis_opt[] = {
 	{ {"verbosity",         no_argument,       NULL, 'v'}, setverbosity },
 	{ {"volume",            required_argument, NULL, 'V'}, NULL }
 };
-
 
 
 /**
@@ -253,7 +253,6 @@ static void parse_options(dis_context_t dis_ctx, char* optstr)
 int dis_getopts(dis_context_t dis_ctx, int argc, char** argv)
 {
 	/** See man getopt_long(3) */
-	extern int optind;
 	int optchar = 0;
 	size_t nb_options = sizeof(dis_opt)/sizeof(struct _dis_options);
 
@@ -269,7 +268,7 @@ int dis_getopts(dis_context_t dis_ctx, int argc, char** argv)
 	int trueval = TRUE;
 
 
-	long_opts = malloc(nb_options * sizeof(struct option));
+	long_opts = (struct option*) malloc(nb_options * sizeof(struct option));
 	while(nb_options--)
 	{
 		long_opts[nb_options].name    = dis_opt[nb_options].opt.name;
@@ -296,7 +295,7 @@ int dis_getopts(dis_context_t dis_ctx, int argc, char** argv)
 			}
 			case 'F':
 			{
-				off_t force;
+				off64_t force;
 				if(optarg)
 					force = (unsigned char) strtol(optarg, NULL, 10);
 				else
@@ -329,7 +328,7 @@ int dis_getopts(dis_context_t dis_ctx, int argc, char** argv)
 			}
 			case 'O':
 			{
-				off_t offset = (off_t) strtoll(optarg, NULL, 10);
+				off64_t offset = (off64_t) strtoll(optarg, NULL, 10);
 				dis_setopt(dis_ctx, DIS_OPT_VOLUME_OFFSET, &offset);
 				break;
 			}
@@ -370,8 +369,8 @@ int dis_getopts(dis_context_t dis_ctx, int argc, char** argv)
 			}
 			case 'v':
 			{
-				if(cfg->verbosity != L_QUIET)
-					cfg->verbosity++;
+				if (cfg->verbosity != L_QUIET)
+					cfg->verbosity = (DIS_LOGS)(cfg->verbosity + 1);
 				break;
 			}
 			case 'V':
@@ -491,10 +490,10 @@ int dis_getopt(dis_context_t dis_ctx, dis_opt_e opt_name, void** opt_value)
 			*opt_value = cfg->log_file;
 			break;
 		case DIS_OPT_FORCE_BLOCK:
-			*opt_value = (void*) ((long) cfg->force_block);
+			*opt_value = (void*) ((intptr_t) cfg->force_block);
 			break;
 		case DIS_OPT_VOLUME_OFFSET:
-			*opt_value = (void*) cfg->offset;
+			*opt_value = (void*) (intptr_t) cfg->offset;
 			break;
 		case DIS_OPT_READ_ONLY:
 			if(cfg->flags & DIS_FLAG_READ_ONLY)
@@ -549,7 +548,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			if(opt_value == NULL)
 				cfg->volume_path = NULL;
 			else
-				cfg->volume_path = strdup((const char*) opt_value);
+				cfg->volume_path = _strdup((const char*) opt_value);
 			break;
 		case DIS_OPT_USE_CLEAR_KEY:
 			if(opt_value == NULL)
@@ -569,7 +568,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			if(opt_value == NULL)
 				cfg->bek_file = NULL;
 			else
-				cfg->bek_file = strdup((const char*) opt_value);
+				cfg->bek_file = _strdup((const char*) opt_value);
 			break;
 		case DIS_OPT_USE_RECOVERY_PASSWORD:
 			if(opt_value == NULL)
@@ -585,7 +584,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			else
 			{
 				const char* v = (const char*) opt_value;
-				cfg->recovery_password = (uint8_t *) strdup(v);
+				cfg->recovery_password = (uint8_t *) _strdup(v);
 			}
 			break;
 		case DIS_OPT_USE_USER_PASSWORD:
@@ -602,7 +601,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			else
 			{
 				const char* v = (const char*) opt_value;
-				cfg->user_password = (uint8_t *) strdup(v);
+				cfg->user_password = (uint8_t *) _strdup(v);
 			}
 			break;
 		case DIS_OPT_USE_FVEK_FILE:
@@ -617,7 +616,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			if(opt_value == NULL)
 				cfg->fvek_file = NULL;
 			else
-				cfg->fvek_file = strdup((const char*) opt_value);
+				cfg->fvek_file = _strdup((const char*) opt_value);
 			break;
 		case DIS_OPT_USE_VMK_FILE:
 			if(opt_value == NULL)
@@ -631,7 +630,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			if(opt_value == NULL)
 				cfg->vmk_file = NULL;
 			else
-				cfg->vmk_file = strdup((const char*) opt_value);
+				cfg->vmk_file = _strdup((const char*) opt_value);
 			break;
 		case DIS_OPT_VERBOSITY:
 			if(opt_value == NULL)
@@ -651,7 +650,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			if(opt_value == NULL)
 				cfg->log_file = NULL;
 			else
-				cfg->log_file = strdup((const char*) opt_value);
+				cfg->log_file = _strdup((const char*) opt_value);
 			break;
 		case DIS_OPT_FORCE_BLOCK:
 			if(opt_value == NULL)
@@ -669,7 +668,7 @@ int dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value)
 			if(opt_value == NULL)
 				cfg->offset = 0;
 			else
-				cfg->offset = *(off_t*) opt_value;
+				cfg->offset = *(off64_t*) opt_value;
 			break;
 		case DIS_OPT_READ_ONLY:
 			if(opt_value == NULL)
@@ -826,5 +825,6 @@ int dis_is_volume_state_checked(dis_context_t dis_ctx)
 {
 	if(!dis_ctx)
 		return -1;
-	return !(dis_ctx->cfg.flags & DIS_FLAG_DONT_CHECK_VOLUME_STATE);
+
+	return (dis_ctx->cfg.flags & DIS_FLAG_DONT_CHECK_VOLUME_STATE) == 0;
 }

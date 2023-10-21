@@ -25,17 +25,22 @@
 
 
 #include <stdint.h>
+#include <dislocker/xstd/xstdio.h>
 
 
 /*
  * Prototypes
  */
+DISLOCKER_API
 void diffuserA_decrypt(uint8_t* sector, uint16_t sector_size, uint32_t* buffer);
 
+DISLOCKER_API
 void diffuserB_decrypt(uint8_t* sector, uint16_t sector_size, uint32_t* buffer);
 
+DISLOCKER_API
 void diffuserA_encrypt(uint8_t* sector, uint16_t sector_size, uint32_t* buffer);
 
+DISLOCKER_API
 void diffuserB_encrypt(uint8_t* sector, uint16_t sector_size, uint32_t* buffer);
 
 

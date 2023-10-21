@@ -308,14 +308,14 @@ int get_vmk_from_file(dis_config_t* cfg, void** vmk_datum)
 	if(!cfg)
 		return FALSE;
 
-	off_t actual_size   = -1;
+	off64_t actual_size   = -1;
 	int   file_fd = -1;
 	datum_key_t* datum_key = NULL;
 	ssize_t rs;
 
 	char vmk_keys[32] = {0,};
 
-	off_t expected_size = sizeof(vmk_keys);
+	off64_t expected_size = sizeof(vmk_keys);
 
 
 	file_fd = dis_open(cfg->vmk_file, O_RDONLY);

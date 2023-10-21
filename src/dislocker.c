@@ -60,16 +60,9 @@
  * On Darwin and FreeBSD, files are opened using 64 bits offsets/variables
  * and O_LARGEFILE isn't defined
  */
-#if defined(__DARWIN) || defined(__FREEBSD)
+#if defined(__DARWIN) || defined(__FREEBSD) || defined(_WIN32)
 #  define O_LARGEFILE 0
 #endif /* __DARWIN || __FREEBSD */
-
-
-
-/* Get low-level errors the library encountered by looking at this variable */
-int dis_errno;
-
-
 
 dis_context_t dis_new()
 {
@@ -110,8 +103,10 @@ int dis_initialize(dis_context_t dis_ctx)
 	dis_printf(L_INFO, "Compiled version: " VERSION_DBG "\n");
 #endif
 
+#ifndef _DLL
 	if(dis_ctx->cfg.verbosity >= L_DEBUG)
 		dis_print_args(dis_ctx);
+#endif
 
 
 	/*
@@ -278,12 +273,12 @@ int dis_initialize(dis_context_t dis_ctx)
 
 
 
-int dislock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
+int dislock(dis_context_t dis_ctx, uint8_t* buffer, off64_t offset, size_t size)
 {
 	uint8_t* buf = NULL;
 
 	size_t sector_count;
-	off_t  sector_start;
+	off64_t  sector_start;
 	size_t sector_to_add = 0;
 	uint16_t sector_size;
 
@@ -328,13 +323,13 @@ int dislock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 		return -EFAULT;
 	}
 
-	if((offset >= (off_t)dis_ctx->io_data.volume_size) && !dis_metadata_is_decrypted_state(dis_ctx->io_data.metadata))
+	if((offset >= (off64_t)dis_ctx->io_data.volume_size) && !dis_metadata_is_decrypted_state(dis_ctx->io_data.metadata))
 	{
 		dis_printf(
 			L_ERROR,
 			"Offset (%#" F_OFF_T ") exceeds volume's size (%#" F_OFF_T ")\n",
 			offset,
-			(off_t)dis_ctx->io_data.volume_size
+			(off64_t)dis_ctx->io_data.volume_size
 		);
 		return -EFAULT;
 	}
@@ -366,7 +361,7 @@ int dislock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 	sector_size = dis_ctx->io_data.sector_size;
 	if((offset % sector_size) != 0)
 		sector_to_add += 1;
-	if(((offset + (off_t)size) % sector_size) != 0)
+	if(((offset + (off64_t)size) % sector_size) != 0)
 		sector_to_add += 1;
 
 	sector_count = ( size / sector_size ) + sector_to_add;
@@ -432,14 +427,14 @@ int dislock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 
 
 
-int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
+int enlock(dis_context_t dis_ctx, uint8_t* buffer, off64_t offset, size_t size)
 {
 	uint8_t* buf = NULL;
 	int      ret = 0;
 
 	uint16_t sector_size;
 	size_t sector_count;
-	off_t  sector_start;
+	off64_t  sector_start;
 	size_t sector_to_add = 0;
 
 
@@ -487,15 +482,15 @@ int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 		return -EFAULT;
 	}
 
-	if(offset >= (off_t)dis_ctx->io_data.volume_size)
+	if(offset >= (off64_t)dis_ctx->io_data.volume_size)
 	{
 		dis_printf(L_ERROR, "Offset (%#" F_OFF_T ") exceeds volume's size (%#"
 		                 F_OFF_T ")\n",
-		        offset, (off_t)dis_ctx->io_data.volume_size);
+		        offset, (off64_t)dis_ctx->io_data.volume_size);
 		return -EFAULT;
 	}
 
-	if(offset + (off_t)size >= (off_t)dis_ctx->io_data.volume_size)
+	if(offset + (off64_t)size >= (off64_t)dis_ctx->io_data.volume_size)
 	{
 		size_t nsize = (size_t)dis_ctx->io_data.volume_size
 		               - (size_t)offset;
@@ -504,7 +499,7 @@ int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 			"Size modified as exceeding volume's end (offset=%#"
 			F_OFF_T " + size=%#" F_OFF_T " >= volume_size=%#"
 			F_OFF_T ") ; new size: %#" F_SIZE_T "\n",
-			offset, (off_t)size, dis_ctx->io_data.volume_size, nsize
+			offset, (off64_t)size, dis_ctx->io_data.volume_size, nsize
 		);
 		size = nsize;
 	}
@@ -526,13 +521,13 @@ int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 	   offset < dis_ctx->metadata->virtualized_size)
 	{
 		dis_printf(L_DEBUG, "  Entering virtualized area\n");
-		if(offset + (off_t)size <= dis_ctx->metadata->virtualized_size)
+		if(offset + (off64_t)size <= dis_ctx->metadata->virtualized_size)
 		{
 			/*
 			 * If all the request is within the virtualized area, just change
 			 * the offset
 			 */
-			offset = offset + (off_t)dis_ctx->metadata->information->boot_sectors_backup;
+			offset = offset + (off64_t)dis_ctx->metadata->information->boot_sectors_backup;
 			dis_printf(L_DEBUG, "  `-> Just redirecting to %#"F_OFF_T"\n", offset);
 		}
 		else
@@ -587,7 +582,7 @@ int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size)
 	sector_size = dis_ctx->io_data.sector_size;
 	if((offset % sector_size) != 0)
 		sector_to_add += 1;
-	if(((offset + (off_t)size) % sector_size) != 0)
+	if(((offset + (off64_t)size) % sector_size) != 0)
 		sector_to_add += 1;
 
 

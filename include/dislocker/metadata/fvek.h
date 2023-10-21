@@ -32,8 +32,10 @@
 /*
  * Functions prototypes
  */
+DISLOCKER_API
 int get_fvek(dis_metadata_t dis_metadata, void* vmk_datum, void** fvek_datum);
 
+DISLOCKER_API
 int build_fvek_from_file(dis_config_t* cfg, void** fvek_datum);
 
 

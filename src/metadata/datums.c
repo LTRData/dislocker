@@ -242,7 +242,7 @@ int get_payload_safe(void* data, void** payload, size_t* size_payload)
 	*payload = dis_malloc(*size_payload);
 
 	memset(*payload, 0, *size_payload);
-	memcpy(*payload, data + size_header, *size_payload);
+	memcpy(*payload, (char*)data + size_header, *size_payload);
 
 	return TRUE;
 }
@@ -468,7 +468,7 @@ void print_datum_external(DIS_LOGS level, void* vdatum)
 
 	format_guid(datum->guid, extkey_id);
 	ntfs2utc(datum->timestamp, &ts);
-	date = strdup(asctime(gmtime(&ts)));
+	date = _strdup(asctime(gmtime(&ts)));
 	chomp(date);
 
 	dis_printf(level, "Recovery Key GUID: '%.39s'\n", extkey_id);
@@ -540,7 +540,7 @@ void print_nonce(DIS_LOGS level, uint8_t* nonce)
 	char s[12*3 + 1] = {0,};
 
 	for(i = 0; i < 12; ++i)
-		snprintf(&s[i*3], 4, "%02hhx ", nonce[i]);
+		_snprintf(&s[i*3], 4, "%02hhx ", nonce[i]);
 
 	dis_printf(level, "%s\n", s);
 }
@@ -558,7 +558,7 @@ void print_mac(DIS_LOGS level, uint8_t* mac)
 	char s[16*3 + 1] = {0,};
 
 	for(i = 0; i < 16; ++i)
-		snprintf(&s[i*3], 4, "%02hhx ", mac[i]);
+		_snprintf(&s[i*3], 4, "%02hhx ", mac[i]);
 
 	dis_printf(level, "%s\n", s);
 }
@@ -595,13 +595,13 @@ int get_next_datum(
 	*datum_result = NULL;
 	memset(&header, 0, sizeof(datum_header_safe_t));
 	if(datum_begin)
-		datum = datum_begin + *(uint16_t*)datum_begin;
+		datum = (char*)datum_begin + *(uint16_t*)datum_begin;
 	else
 		datum = (char*)dataset + dataset->header_size;
 
 	while(1)
 	{
-		if(datum + 8 >= limit)
+		if((char*)datum + 8 >= (char*)limit)
 		{
 			dis_printf(L_DEBUG, "Hit limit, search failed.\n");
 			break;
@@ -630,7 +630,7 @@ int get_next_datum(
 			break;
 		}
 
-		datum += header.datum_size;
+		(char*)datum += header.datum_size;
 
 		memset(&header, 0, sizeof(datum_header_safe_t));
 	}
@@ -706,7 +706,7 @@ int get_nested_datumvaluetype(void* datum, dis_datums_value_type_t value_type, v
 	while(nested_header.value_type != value_type)
 	{
 		/* Just go to the next datum */
-		*datum_nested += nested_header.datum_size;
+		(char*)*datum_nested += nested_header.datum_size;
 
 		/* If we're not into the datum anymore */
 		if((char*)datum + header.datum_size <= (char*)*datum_nested)

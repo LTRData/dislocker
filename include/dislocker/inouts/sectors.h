@@ -32,18 +32,21 @@
 /*
  * Functions prototypes
  */
+DISLOCKER_API
 int read_decrypt_sectors(
 	dis_iodata_t* io_data,
 	size_t nb_read_sector,
 	uint16_t sector_size,
-	off_t sector_start,
+	off64_t sector_start,
 	uint8_t* output
 );
+
+DISLOCKER_API
 int encrypt_write_sectors(
 	dis_iodata_t* io_data,
 	size_t nb_write_sector,
 	uint16_t sector_size,
-	off_t sector_start,
+	off64_t sector_start,
 	uint8_t* input
 );
 

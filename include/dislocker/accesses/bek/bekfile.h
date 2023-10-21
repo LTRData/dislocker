@@ -35,9 +35,13 @@
  * Prototypes
  */
 
+DISLOCKER_API
 int get_vmk_from_bekfile(dis_metadata_t dis_meta, dis_config_t* cfg, void** vmk_datum);
+
+DISLOCKER_API
 int get_vmk_from_bekfile2(dis_metadata_t dis_meta, char* bek_file, void** vmk_datum);
 
+DISLOCKER_API
 int get_bek_dataset(int fd, void** bek_dataset);
 
 

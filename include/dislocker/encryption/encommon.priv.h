@@ -60,14 +60,14 @@ struct _dis_crypt {
 		dis_aes_contexts_t* ctx,
 		uint16_t sector_size,
 		uint8_t* sector,
-		off_t sector_address,
+		off64_t sector_address,
 		uint8_t* buffer
 	);
 	void (*encrypt_fn)(
 		dis_aes_contexts_t* ctx,
 		uint16_t sector_size,
 		uint8_t* sector,
-		off_t sector_address,
+		off64_t sector_address,
 		uint8_t* buffer
 	);
 };

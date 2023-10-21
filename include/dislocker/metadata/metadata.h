@@ -50,48 +50,69 @@ typedef struct _dis_metadata* dis_metadata_t;
 /*
  * Prototypes
  */
+DISLOCKER_API
 dis_metadata_t dis_metadata_new(dis_metadata_config_t dis_metadata_cfg);
+
+DISLOCKER_API
 dis_metadata_t dis_metadata_get(dis_context_t dis_ctx);
 
+DISLOCKER_API
 int dis_metadata_initialize(dis_metadata_t dis_metadata);
 
+DISLOCKER_API
 int dis_metadata_destroy(dis_metadata_t dis_metadata);
 
 
+DISLOCKER_API
 int check_state(dis_metadata_t dis_metadata);
 
+DISLOCKER_API
 void dis_metadata_vista_vbr_fve2ntfs(dis_metadata_t dis_meta, void* vbr);
+
+DISLOCKER_API
 void dis_metadata_vista_vbr_ntfs2fve(dis_metadata_t dis_meta, void* vbr);
 
+DISLOCKER_API
 int dis_metadata_is_overwritten(
 	dis_metadata_t dis_metadata,
-	off_t offset,
+	off64_t offset,
 	size_t size
 );
 
+DISLOCKER_API
 uint64_t dis_metadata_volume_size_from_vbr(dis_metadata_t dis_meta);
 
+DISLOCKER_API
 void* dis_metadata_set_dataset(
 	dis_metadata_t dis_metadata,
 	void* new_dataset
 );
 
+DISLOCKER_API
 void* dis_metadata_set_volume_header(
 	dis_metadata_t dis_metadata,
 	void* new_volume_header
 );
 
+DISLOCKER_API
 uint16_t dis_metadata_sector_size(dis_metadata_t dis_meta);
 
+DISLOCKER_API
 version_t dis_metadata_information_version(dis_metadata_t dis_meta);
 
+DISLOCKER_API
 uint64_t dis_metadata_encrypted_volume_size(dis_metadata_t dis_meta);
 
+DISLOCKER_API
 uint64_t dis_metadata_ntfs_sectors_address(dis_metadata_t dis_meta);
+
+DISLOCKER_API
 uint64_t dis_metadata_mftmirror(dis_metadata_t dis_meta);
 
+DISLOCKER_API
 uint32_t dis_metadata_backup_sectors_count(dis_metadata_t dis_meta);
 
+DISLOCKER_API
 int dis_metadata_is_decrypted_state(dis_metadata_t dis_meta);
 
 #endif // METADATA_H

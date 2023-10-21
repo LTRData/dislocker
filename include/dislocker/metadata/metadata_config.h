@@ -46,7 +46,7 @@ struct _dis_metadata_config {
 	 * Begin to read the BitLocker volume at this offset, making this offset the
 	 * zero-one
 	 */
-	off_t         offset;
+	off64_t         offset;
 
 	/* States dislocker's metadata initialisation is at or will be stopped at */
 	dis_state_e   curr_state;
@@ -62,7 +62,10 @@ struct _dis_metadata_config {
 /*
  * Prototypes
  */
+DISLOCKER_API
 dis_metadata_config_t dis_metadata_config_new();
+
+DISLOCKER_API
 void dis_metadata_config_destroy(dis_metadata_config_t dis_metadata_cfg);
 
 

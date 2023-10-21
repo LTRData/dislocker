@@ -34,8 +34,10 @@
  * Prototypes
  */
 
+DISLOCKER_API
 int stretch_recovery_key(const uint8_t *recovery_key, const uint8_t *salt, uint8_t *result);
 
+DISLOCKER_API
 int stretch_user_key(const uint8_t *user_hash, const uint8_t *salt, uint8_t *result);
 
 

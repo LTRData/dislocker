@@ -121,7 +121,7 @@ void print_information(DIS_LOGS level, dis_metadata_t dis_meta)
 	dis_printf(level, "  Version: %hu\n", information->version);
 	dis_printf(level, "  Current state: %s (%hu)\n", get_state_str(information->curr_state), information->curr_state);
 	dis_printf(level, "  Next state: %s (%hu)\n",    get_state_str(information->next_state), information->next_state);
-	dis_printf(level, "  Encrypted volume size: %1$" PRIu64 " bytes (%1$#" PRIx64 "), ~%2$" PRIu64 " MB\n", information->encrypted_volume_size, information->encrypted_volume_size / (1024*1024));
+	dis_printf(level, "  Encrypted volume size: %1$" PRIu64 " bytes (%1$#" PRIx64 "), ~%2$" PRIu64 " MB\n", information->encrypted_volume_size, information->encrypted_volume_size / ((uint64_t)1024*1024));
 	dis_printf(level, "  Size of conversion region: %1$#x (%1$u)\n", information->convert_size);
 	dis_printf(level, "  Number of boot sectors backuped: %1$u sectors (%1$#x)\n", information->nb_backup_sectors);
 	dis_printf(level, "  First metadata header offset:  %#" PRIx64 "\n", information->information_off[0]);
@@ -156,7 +156,7 @@ void print_dataset(DIS_LOGS level, dis_metadata_t dis_meta)
 
 	format_guid(dataset->guid, formated_guid);
 	ntfs2utc(dataset->timestamp, &ts);
-	date = strdup(asctime(gmtime(&ts)));
+	date = _strdup(asctime(gmtime(&ts)));
 	chomp(date);
 
 	dis_printf(level, "  ----------------------------{ Dataset header }----------------------------\n");
@@ -239,7 +239,7 @@ void print_data(DIS_LOGS level, dis_metadata_t dis_meta)
 		if(!get_header_safe(data, &header))
 			break;
 
-		if(data + header.datum_size > end_dataset)
+		if((char*)data + header.datum_size > (char*)end_dataset)
 			break;
 
 		dis_printf(level, "\n");
@@ -247,6 +247,6 @@ void print_data(DIS_LOGS level, dis_metadata_t dis_meta)
 		print_one_datum(level, data);
 		dis_printf(level, "=========================================\n");
 
-		data += header.datum_size;
+		(char*)data += header.datum_size;
 	}
 }

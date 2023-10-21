@@ -31,6 +31,7 @@
  * Prototypes of functions from xstdlib.c
  */
 void* dis_malloc(size_t size);
+
 void dis_free(void *pointer);
 
 

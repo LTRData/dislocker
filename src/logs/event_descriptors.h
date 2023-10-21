@@ -23,7 +23,13 @@
 #ifndef EVENT_DESCRIPTORS_H
 #define EVENT_DESCRIPTORS_H
 
+#include <stdint.h>
+
+#ifdef _WIN32
+#define UNUSED
+#else
 #define UNUSED __attribute__ ((unused))
+#endif
 
 
 typedef struct {

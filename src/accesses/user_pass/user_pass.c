@@ -178,6 +178,7 @@ int get_vmk_from_user_pass2(dis_metadata_t dis_meta,
 }
 
 
+#ifndef _WIN32
 /**
  * Get the user's pass without displaying it.
  *
@@ -223,8 +224,8 @@ static ssize_t my_getpass(char **lineptr, FILE *stream)
 		/* Restore terminal. */
 		(void) tcsetattr(fileno(stream), TCSAFLUSH, &old);
 	}
+#endif
 	printf("\n");
-#endif /* __CK_DOING_TESTS */
 
 	dis_printf(
 		L_DEBUG,
@@ -235,6 +236,7 @@ static ssize_t my_getpass(char **lineptr, FILE *stream)
 
 	return nread;
 }
+#endif
 
 
 /**
@@ -299,6 +301,13 @@ int user_key(const uint8_t *user_password,
 }
 
 
+#ifdef _WIN32
+int prompt_up(uint8_t** up)
+{
+	*up = NULL;
+	return FALSE;
+}
+#else
 /**
  * Prompt for the user password to be entered
  *
@@ -353,3 +362,4 @@ int prompt_up(uint8_t** up)
 
 	return TRUE;
 }
+#endif

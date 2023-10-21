@@ -24,6 +24,7 @@
 #define ENCOMMON_H
 
 #include <stdint.h>
+#include <sys/types.h>
 
 /**
  * Cipher used within BitLocker
@@ -68,10 +69,13 @@ typedef struct _dis_crypt* dis_crypt_t;
 /*
  * Prototypes
  */
+DISLOCKER_API
 dis_crypt_t dis_crypt_new(uint16_t sector_size, cipher_t disk_cipher);
 
+DISLOCKER_API
 int dis_crypt_set_fvekey(dis_crypt_t crypt, uint16_t algorithm, uint8_t* fvekey);
 
+DISLOCKER_API
 void dis_crypt_destroy(dis_crypt_t crypt);
 
 

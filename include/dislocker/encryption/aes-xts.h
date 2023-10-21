@@ -23,12 +23,14 @@
 #ifndef DIS_AES_XTS_H
 #define DIS_AES_XTS_H
 
+#include <dislocker/xstd/xstdio.h>
 #include "dislocker/ssl_bindings.h"
 
 
 /*
  * Prototypes
  */
+DISLOCKER_API
 int dis_aes_crypt_xex(
 	AES_CONTEXT *crypt_ctx,
 	AES_CONTEXT *tweak_ctx,
@@ -38,6 +40,8 @@ int dis_aes_crypt_xex(
 	const unsigned char *input,
 	unsigned char *output
 );
+
+DISLOCKER_API
 int dis_aes_crypt_xts(
 	AES_CONTEXT *crypt_ctx,
 	AES_CONTEXT *tweak_ctx,

@@ -35,6 +35,7 @@ typedef uint64_t ntfs_time_t;
 /*
  * Prototypes of functions from clock.c
  */
+DISLOCKER_API
 void ntfs2utc(ntfs_time_t t, time_t *ts);
 
 

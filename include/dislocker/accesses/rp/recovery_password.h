@@ -34,11 +34,16 @@
  * Prototypes
  */
 
+DISLOCKER_API
 int get_vmk_from_rp(dis_metadata_t dis_meta, dis_config_t* cfg, void** vmk_datum);
+
+DISLOCKER_API
 int get_vmk_from_rp2(dis_metadata_t dis_meta, uint8_t* recovery_password, void** vmk_datum);
 
+DISLOCKER_API
 int is_valid_key(const uint8_t *recovery_password, uint16_t *short_password);
 
+DISLOCKER_API
 int intermediate_key(const uint8_t *recovery_key, const uint8_t *salt, uint8_t *result_key);
 
 int prompt_rp(uint8_t** rp);

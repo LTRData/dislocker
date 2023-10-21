@@ -25,13 +25,22 @@
 
 #include <errno.h>
 
-/*
+#ifndef DISLOCKER_API
+#ifdef BUILD_DISLOCKER
+#define DISLOCKER_API __declspec(dllexport)
+#else
+#define DISLOCKER_API __declspec(dllimport)
+#endif
+#endif
+ 
+ /*
  * dislocker saves errno in this variable when returning something else than
  * DIS_RET_SUCCESS.
  * Returns (listed below) are for `high-level' errors, returned by dislocker,
  * whereas dis_errno is for `low-levels' ones, the reason why dislocker returned
  * an error.
  */
+DISLOCKER_API
 extern int dis_errno;
 
 

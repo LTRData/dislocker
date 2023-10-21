@@ -32,10 +32,13 @@
 /*
  * Prototypes of functions from encoding.c
  */
+DISLOCKER_API
 int utf16towchars(uint16_t* utf16, size_t utf16_length, wchar_t* utf32);
 
+DISLOCKER_API
 int asciitoutf16(const uint8_t* ascii, uint16_t* utf16);
 
+DISLOCKER_API
 int utf16bigtolittleendian(uint16_t* utf16, size_t utf16_length);
 
 

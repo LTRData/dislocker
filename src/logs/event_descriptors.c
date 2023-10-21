@@ -26,6 +26,7 @@
 
 void init_events()
 {
+#ifndef _WIN32
 	FVE_ENCRYPT_START = {
 		.id = 0x6001
 		.version = 0,
@@ -503,4 +504,5 @@ void init_events()
 		.task = 0,
 		.keyword = 0x8000000000000000
 	};
+#endif
 }

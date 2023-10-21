@@ -36,12 +36,14 @@
 /**
  * Function used to initialize keys used for decryption/encryption
  */
+DISLOCKER_API
 int init_keys(bitlocker_dataset_t* dataset, datum_key_t* fvek, dis_crypt_t crypt);
 
 /**
  * Function used to prepare a structure which hold data used for
  * decryption/encryption
  */
+DISLOCKER_API
 int prepare_crypt(dis_context_t dis_ctx);
 
 

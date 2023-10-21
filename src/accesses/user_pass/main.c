@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 				usage(argv);
 				return 0;
 			case 'u':
-				user_password = (uint8_t *) strdup(optarg);
+				user_password = (uint8_t *) _strdup(optarg);
 				break;
 			case '?':
 			default:

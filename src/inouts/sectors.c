@@ -53,7 +53,7 @@ typedef struct _thread_arg
 	unsigned int thread_begin;
 
 	uint16_t sector_size;
-	off_t    sector_start;
+	off64_t    sector_start;
 
 	uint8_t* input;
 	uint8_t* output;
@@ -68,7 +68,7 @@ static void* thread_decrypt(void* args);
 static void* thread_encrypt(void* args);
 static void fix_read_sector_seven(
 	dis_iodata_t* io_data,
-	off_t sector_address,
+	off64_t sector_address,
 	uint8_t *input,
 	uint8_t *output
 );
@@ -102,7 +102,7 @@ int read_decrypt_sectors(
 	dis_iodata_t* io_data,
 	size_t nb_read_sector,
 	uint16_t sector_size,
-	off_t sector_start,
+	off64_t sector_start,
 	uint8_t* output)
 {
 	// Check parameters
@@ -113,13 +113,13 @@ int read_decrypt_sectors(
 	size_t   nb_loop = 0;
 	size_t   size    = nb_read_sector * sector_size;
 	uint8_t* input   = dis_malloc(size);
-	off_t    off     = sector_start + io_data->part_off;
+	off64_t    off     = sector_start + io_data->part_off;
 
 	memset(input , 0, size);
 	memset(output, 0, size);
 
 	/* Read the sectors we need */
-	ssize_t read_size = pread(io_data->volume_fd, input, size, off);
+	ssize_t read_size = pread(io_data->volume_fd, input, (int)size, off);
 
 	if(read_size <= 0)
 	{
@@ -213,7 +213,7 @@ int encrypt_write_sectors(
 	dis_iodata_t* io_data,
 	size_t nb_write_sector,
 	uint16_t sector_size,
-	off_t sector_start,
+	off64_t sector_start,
 	uint8_t* input)
 {
 	// Check parameter
@@ -277,7 +277,7 @@ int encrypt_write_sectors(
 	ssize_t write_size = pwrite(
 		io_data->volume_fd,
 		output,
-		nb_write_sector * sector_size,
+		(int)(nb_write_sector * sector_size),
 		sector_start + io_data->part_off
 	);
 
@@ -302,7 +302,7 @@ static void* thread_decrypt(void* params)
 	thread_arg_t* args    = (thread_arg_t*) params;
 	dis_iodata_t* io_data = args->io_data;
 
-	off_t    loop         = args->thread_begin;
+	off64_t    loop         = args->thread_begin;
 	uint16_t step_unit    = args->nb_threads;
 
 	int      hover        = 0;
@@ -311,12 +311,12 @@ static void* thread_decrypt(void* params)
 	uint16_t step_size    = (uint16_t) (sector_size * step_unit);
 	uint64_t encrypted_volume_total_sectors = io_data->encrypted_volume_size / sector_size;
 
-	off_t    offset       = args->sector_start + sector_size * loop;
+	off64_t    offset       = args->sector_start + sector_size * loop;
 	uint8_t* loop_input   = args->input + sector_size * loop;
 	uint8_t* loop_output  = args->output + sector_size * loop;
 
 
-	for( ; loop < (off_t)args->nb_loop;
+	for( ; loop < (off64_t)args->nb_loop;
 	       loop        += step_unit,
 	       offset      += step_size,
 	       loop_input  += step_size,
@@ -336,7 +336,7 @@ static void* thread_decrypt(void* params)
 		 *   encryption was paused during BitLocker's turn on.
 		 */
 
-		off_t sector_offset = args->sector_start / sector_size + loop;
+		off64_t sector_offset = args->sector_start / sector_size + loop;
 
 		/* Check for zero out areas */
 		hover = dis_metadata_is_overwritten(
@@ -376,12 +376,12 @@ static void* thread_decrypt(void* params)
 			);
 			memcpy(loop_output, loop_input, sector_size);
 		}
-		else if(version == V_VISTA && (sector_offset < 16 || sector_offset + 1 == (off_t) encrypted_volume_total_sectors))
+		else if(version == V_VISTA && (sector_offset < 16 || sector_offset + 1 == (off64_t) encrypted_volume_total_sectors))
 		{
 			/*
 			 * The firsts sectors are not really encrypted on a Vista volume
 			 */
-			if(sector_offset < 1 || sector_offset + 1 == (off_t) encrypted_volume_total_sectors)
+			if(sector_offset < 1 || sector_offset + 1 == (off64_t) encrypted_volume_total_sectors)
 				fix_read_sector_vista(
 					io_data,
 					loop_input,
@@ -428,7 +428,7 @@ static void* thread_encrypt(void* params)
 	thread_arg_t* args    = (thread_arg_t*)params;
 	dis_iodata_t* io_data = args->io_data;
 
-	off_t    loop        = args->thread_begin;
+	off64_t    loop        = args->thread_begin;
 	uint16_t step_unit   = args->nb_threads;
 
 	uint16_t version     = dis_metadata_information_version(io_data->metadata);
@@ -438,10 +438,10 @@ static void* thread_encrypt(void* params)
 
 	uint8_t* loop_input  = args->input + sector_size * loop;
 	uint8_t* loop_output = args->output + sector_size * loop;
-	off_t    offset      = args->sector_start + sector_size * loop;
+	off64_t    offset      = args->sector_start + sector_size * loop;
 
 
-	for( ; loop < (off_t)args->nb_loop;
+	for( ; loop < (off64_t)args->nb_loop;
 	       loop        += step_unit,
 	       offset      += step_size,
 	       loop_input  += step_size,
@@ -454,18 +454,18 @@ static void* thread_encrypt(void* params)
 		 * decryption function above")
 		 */
 
-		off_t sector_offset = args->sector_start / sector_size + loop;
+		off64_t sector_offset = args->sector_start / sector_size + loop;
 
 		/*
 		 * NOTE: Seven specificities are dealt with earlier in the process
 		 * see dislocker.c:enlock()
 		 */
-		if(version == V_VISTA && (sector_offset < 16 || sector_offset + 1 == (off_t) encrypted_volume_total_sectors))
+		if(version == V_VISTA && (sector_offset < 16 || sector_offset + 1 == (off64_t) encrypted_volume_total_sectors))
 		{
 			/*
 			 * The firsts sectors are not really encrypted on a Vista volume
 			 */
-			if(sector_offset < 1 || sector_offset + 1 == (off_t) encrypted_volume_total_sectors)
+			if(sector_offset < 1 || sector_offset + 1 == (off64_t) encrypted_volume_total_sectors)
 				fix_write_sector_vista(
 					io_data,
 					loop_input,
@@ -510,7 +510,7 @@ static void* thread_encrypt(void* params)
  */
 static void fix_read_sector_seven(
 	dis_iodata_t* io_data,
-	off_t sector_address,
+	off64_t sector_address,
 	uint8_t* input,
 	uint8_t* output)
 {
@@ -527,8 +527,8 @@ static void fix_read_sector_seven(
 	 * structure.
 	 * So we can use them here to give a good NTFS partition's beginning.
 	 */
-	off_t from = sector_address;
-	off_t to   = from + (off_t)io_data->backup_sectors_addr;
+	off64_t from = sector_address;
+	off64_t to   = from + (off64_t)io_data->backup_sectors_addr;
 
 	dis_printf(L_DEBUG, "  Fixing sector (7): from %#" F_OFF_T " to %#" F_OFF_T
 	                 "\n", from, to);

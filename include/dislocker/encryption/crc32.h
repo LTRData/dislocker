@@ -23,9 +23,12 @@
 #ifndef CRC32_H
 #define CRC32_H
 
+#include <dislocker/xstd/xstdio.h>
+
 /*
  * Prototypes
  */
+DISLOCKER_API
 unsigned int crc32(const unsigned char *buf, const unsigned int len);
 
 #endif /* CRC32_H */

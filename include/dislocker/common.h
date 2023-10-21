@@ -28,14 +28,30 @@
 #include "dislocker/xstd/xstdlib.h"
 #include <inttypes.h>
 #include <stdint.h>
+#include <sys/types.h>
 #include <string.h>
 
-
+#define PROGNAME "dislocker"
+#define AUTHOR ""
+#define VERSION ""
+#define __OS "Windows"
+#define __ARCH ""
 
 /* Convention */
 #define TRUE 1
 #define FALSE 0
 
+#ifndef STDIN_FILENO
+#define STDIN_FILENO 0
+#endif
+
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
+#endif
+
+#ifndef STDERR_FILENO
+#define STDERR_FILENO 2
+#endif
 
 
 /* Signatures of volumes */
@@ -69,12 +85,14 @@ int dis_open(const char *file, int mode);
 int dis_close(int fd);
 ssize_t dis_read(int fd, void* buf, size_t count);
 ssize_t dis_write(int fd, void* buf, size_t count);
-off_t dis_lseek(int fd, off_t offset, int whence);
+off64_t dis_lseek(int fd, off64_t offset, int whence);
 
 void hexdump(DIS_LOGS level, uint8_t* data, size_t data_size);
 
+DISLOCKER_API
 void xor_buffer(unsigned char* buf1, const unsigned char* buf2, unsigned char* output, size_t size);
 
+DISLOCKER_API
 void memclean(void* ptr, size_t size);
 
 

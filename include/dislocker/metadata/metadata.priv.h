@@ -280,7 +280,7 @@ struct _dis_metadata {
 	dis_regions_t    virt_region[5];
 
 	/* Size (in bytes) of the NTFS backed-up sectors */
-	off_t            virtualized_size;
+	off64_t            virtualized_size;
 
 	/* Extended info which may be present (NULL otherwise) */
 	extended_info_t* xinfo;

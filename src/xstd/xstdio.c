@@ -123,6 +123,15 @@ void dis_stdio_init(DIS_LOGS v, const char* file)
  */
 int get_input_fd()
 {
+#ifdef _WIN32
+	if (tty_fd > -1)
+		return tty_fd;
+
+	if ((tty_fd = _open("CONIN$", O_RDONLY | O_NONBLOCK)) < 0)
+		return -1;
+
+	return tty_fd;
+#else
 	if(tty_fd > -1)
 		return tty_fd;
 
@@ -139,6 +148,7 @@ int get_input_fd()
 	tcsetattr(tty_fd, TCSANOW, &ti);
 
 	return tty_fd;
+#endif
 }
 
 
@@ -149,8 +159,10 @@ void close_input_fd()
 {
 	if(tty_fd > -1)
 	{
+#ifndef _WIN32
 		tcsetattr(tty_fd, TCSANOW, &ti_save);
-		close(tty_fd);
+#endif
+		_close(tty_fd);
 	}
 }
 

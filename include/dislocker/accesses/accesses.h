@@ -32,6 +32,7 @@
 /**
  * Prototypes
  */
+DISLOCKER_API
 int dis_get_access(dis_context_t dis_ctx);
 
 #ifdef _HAVE_RUBY

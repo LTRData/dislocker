@@ -32,31 +32,35 @@
 /*
  * Prototypes
  */
+DISLOCKER_API
 void encrypt_cbc_without_diffuser(
 	dis_aes_contexts_t* ctx,
 	uint16_t sector_size,
 	uint8_t* sector,
-	off_t sector_address,
+	off64_t sector_address,
 	uint8_t* buffer
 );
 
+DISLOCKER_API
 void encrypt_cbc_with_diffuser(
 	dis_aes_contexts_t* ctx,
 	uint16_t sector_size,
 	uint8_t* sector,
-	off_t sector_address,
+	off64_t sector_address,
 	uint8_t* buffer
 );
 
+DISLOCKER_API
 void encrypt_xts(
 	dis_aes_contexts_t* ctx,
 	uint16_t sector_size,
 	uint8_t* sector,
-	off_t sector_address,
+	off64_t sector_address,
 	uint8_t* buffer
 );
 
-int encrypt_sector(dis_crypt_t crypt, uint8_t* sector, off_t sector_address, uint8_t* buffer);
+DISLOCKER_API
+int encrypt_sector(dis_crypt_t crypt, uint8_t* sector, off64_t sector_address, uint8_t* buffer);
 
 
 #endif /* ENCRYPT_H */

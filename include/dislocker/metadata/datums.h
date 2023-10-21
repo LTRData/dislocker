@@ -288,11 +288,16 @@ static const value_types_properties_t datum_value_types_prop[] =
 /*
  * Here are prototypes of functions dealing with data
  */
+DISLOCKER_API
 char* cipherstr(cipher_t enc);
+
+DISLOCKER_API
 char* datumvaluetypestr(dis_datums_value_type_t value_type);
 
+DISLOCKER_API
 int get_header_safe(void* data, datum_header_safe_t* header);
 
+DISLOCKER_API
 int get_payload_safe(void* data, void** payload, size_t* size_payload);
 
 void print_one_datum(DIS_LOGS level, void* datum);
@@ -314,6 +319,7 @@ void print_datum_virtualization(DIS_LOGS level, void* vdatum);
 void print_nonce(DIS_LOGS level, uint8_t* nonce);
 void print_mac(DIS_LOGS level, uint8_t* mac);
 
+DISLOCKER_API
 int get_next_datum(
 	dis_metadata_t dis_metadata,
 	dis_datums_entry_type_t entry_type,
@@ -322,15 +328,20 @@ int get_next_datum(
 	void** datum_result
 );
 
+DISLOCKER_API
 int get_nested_datum(void* datum, void** datum_nested);
+
+DISLOCKER_API
 int get_nested_datumvaluetype(void* datum, dis_datums_value_type_t value_type, void** datum_nested);
 
+DISLOCKER_API
 int datum_value_type_must_be(void* datum, dis_datums_value_type_t value_type);
 
+DISLOCKER_API
 int dis_metadata_has_clear_key(dis_metadata_t dis_meta, void** vmk_datum);
 
-
 typedef void(*print_datum_f)(DIS_LOGS, void*);
+
 static const print_datum_f print_datum_tab[NB_DATUMS_VALUE_TYPES] =
 {
 	print_datum_erased,

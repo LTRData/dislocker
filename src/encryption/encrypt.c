@@ -38,7 +38,7 @@
  * @param buffer The place where we have to put encrypted data
  * @return TRUE if result can be trusted, FALSE otherwise
  */
-int encrypt_sector(dis_crypt_t crypt, uint8_t* sector, off_t sector_address, uint8_t* buffer)
+int encrypt_sector(dis_crypt_t crypt, uint8_t* sector, off64_t sector_address, uint8_t* buffer)
 {
 	// Check parameters
 	if(!crypt || !sector || !buffer)
@@ -65,13 +65,13 @@ int encrypt_sector(dis_crypt_t crypt, uint8_t* sector, off_t sector_address, uin
  * @param sector_address Address of the sector to encrypt
  * @param buffer The place where we have to put encrypted data
  */
-void encrypt_cbc_without_diffuser(dis_aes_contexts_t* ctx, uint16_t sector_size, uint8_t* sector, off_t sector_address, uint8_t* buffer)
+void encrypt_cbc_without_diffuser(dis_aes_contexts_t* ctx, uint16_t sector_size, uint8_t* sector, off64_t sector_address, uint8_t* buffer)
 {
 	/* Parameters are assumed to be correctly checked already */
 
 	union {
 		unsigned char multi[16];
-		off_t single;
+		off64_t single;
 	} iv;
 	memset(iv.multi, 0, 16);
 
@@ -93,13 +93,13 @@ void encrypt_cbc_without_diffuser(dis_aes_contexts_t* ctx, uint16_t sector_size,
  * @param sector_address Address of the sector to encrypt
  * @param buffer The place where we have to put encrypted data
  */
-void encrypt_cbc_with_diffuser(dis_aes_contexts_t* ctx, uint16_t sector_size, uint8_t* sector, off_t sector_address, uint8_t* buffer)
+void encrypt_cbc_with_diffuser(dis_aes_contexts_t* ctx, uint16_t sector_size, uint8_t* sector, off64_t sector_address, uint8_t* buffer)
 {
 	/* Parameters are assumed to be correctly checked already */
 
 	union {
 		uint8_t multi[16];
-		off_t single;
+		off64_t single;
 	} iv;
 	memset(iv.multi, 0, 16);
 	uint8_t sector_key[32] = {0,};
@@ -150,13 +150,13 @@ void encrypt_xts(
 	dis_aes_contexts_t* ctx,
 	uint16_t sector_size,
 	uint8_t* sector,
-	off_t sector_address,
+	off64_t sector_address,
 	uint8_t* buffer)
 {
 	/* Parameters are assumed to be correctly checked already */
 	union {
 		unsigned char multi[16];
-		off_t single;
+		off64_t single;
 	} iv;
 
 	/* Create the iv */

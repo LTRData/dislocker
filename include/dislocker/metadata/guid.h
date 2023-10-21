@@ -34,8 +34,10 @@ typedef uint8_t guid_t[16];
 /*
  * Prototypes
  */
+DISLOCKER_API
 void format_guid(uint8_t *raw_guid, char* formated_guid);
 
+DISLOCKER_API
 int check_match_guid(guid_t guid_1, guid_t guid_2);
 
 #ifdef _HAVE_RUBY

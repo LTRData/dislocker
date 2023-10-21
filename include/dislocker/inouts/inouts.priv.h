@@ -47,7 +47,7 @@ struct _data {
 	datum_key_t*   fvek;
 
 	/* Where the real partition begins */
-	off_t          part_off;
+	off64_t          part_off;
 	/* Volume sector size */
 	uint16_t       sector_size;
 	/* Volume size, in bytes */
@@ -77,7 +77,7 @@ struct _data {
 		struct _data* io_data,
 		size_t nb_read_sector,
 		uint16_t sector_size,
-		off_t sector_start,
+		off64_t sector_start,
 		uint8_t* output
 	);
 	/* Function to encrypt a region of the volume */
@@ -85,7 +85,7 @@ struct _data {
 		struct _data* io_data,
 		size_t nb_write_sector,
 		uint16_t sector_size,
-		off_t sector_start,
+		off64_t sector_start,
 		uint8_t* input
 	);
 };

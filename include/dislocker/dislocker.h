@@ -25,9 +25,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include "dislocker/xstd/xstdio.h" // Only for off_t
-
-
+#include "dislocker/xstd/xstdio.h" // Only for off64_t
 
 /**
  * Main structure to pass to dislocker functions. These keeps various
@@ -44,6 +42,7 @@ typedef struct _dis_ctx* dis_context_t;
  * Allocate internal structure, named a context here. This structure is to be
  * passed to this API's functions and records internal state.
  */
+DISLOCKER_API
 dis_context_t dis_new();
 
 /**
@@ -61,6 +60,7 @@ dis_context_t dis_new();
  * above, this parameter has to be pre-allocated through the use of the
  * dis_new() function.
  */
+DISLOCKER_API
 int dis_initialize(dis_context_t dis_ctx);
 
 /**
@@ -72,7 +72,8 @@ int dis_initialize(dis_context_t dis_ctx);
  * @param buffer The buffer to put decrypted data to.
  * @param size The size of a region to decrypt.
  */
-int dislock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size);
+DISLOCKER_API
+int dislock(dis_context_t dis_ctx, uint8_t* buffer, off64_t offset, size_t size);
 
 /**
  * Once dis_initialize() has been called, this function is able to encrypt data
@@ -83,7 +84,8 @@ int dislock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size);
  * @param buffer The buffer from where to take data to encrypt.
  * @param size The size of a region to decrypt.
  */
-int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size);
+DISLOCKER_API
+int enlock(dis_context_t dis_ctx, uint8_t* buffer, off64_t offset, size_t size);
 
 /**
  * Destroy dislocker structures. This is important to call this function after
@@ -92,12 +94,14 @@ int enlock(dis_context_t dis_ctx, uint8_t* buffer, off_t offset, size_t size);
  * dislock() & enlock() functions may not be called anymore after executing this
  * function.
  */
+DISLOCKER_API
 int dis_destroy(dis_context_t dis_ctx);
 
 /**
  * Retrieve the fd for the FVE volume. This permits reading/writing - although
  * not encouraged - directly to the volume.
  */
+DISLOCKER_API
 int get_fvevol_fd(dis_context_t dis_ctx);
 
 

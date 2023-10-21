@@ -78,14 +78,26 @@ typedef enum {
  * Function's prototypes
  */
 void dis_usage();
+
+DISLOCKER_API
 int  dis_getopts(dis_context_t dis_ctx, int argc, char** argv);
 
+DISLOCKER_API
 int  dis_getopt(dis_context_t dis_ctx, dis_opt_e opt_name, void** opt_value);
+
+DISLOCKER_API
 int  dis_setopt(dis_context_t dis_ctx, dis_opt_e opt_name, const void* opt_value);
+
+DISLOCKER_API
 void dis_free_args(dis_context_t dis_ctx);
+
+DISLOCKER_API
 void dis_print_args(dis_context_t dis_ctx);
 
+DISLOCKER_API
 int dis_is_read_only(dis_context_t dis_ctx);
+
+DISLOCKER_API
 int dis_is_volume_state_checked(dis_context_t dis_ctx);
 
 

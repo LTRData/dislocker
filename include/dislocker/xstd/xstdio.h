@@ -23,15 +23,23 @@
 #ifndef XSTDIO_H
 #define XSTDIO_H
 
-
 #include <stdio.h>
 #include <stdarg.h>
-
+#include <sys/types.h>
 
 /* Mode in which the log file is opened */
 #define LOG_MODE "a"
 
+typedef __int64 off64_t;
+typedef intptr_t ssize_t;
 
+#ifndef DISLOCKER_API
+#ifdef BUILD_DISLOCKER
+#define DISLOCKER_API __declspec(dllexport)
+#else
+#define DISLOCKER_API __declspec(dllimport)
+#endif
+#endif
 
 
 /** Messages debug level */
