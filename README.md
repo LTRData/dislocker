@@ -1,5 +1,41 @@
 # Dislocker [![Build Status](https://travis-ci.org/Aorimn/dislocker.svg?branch=develop)](https://travis-ci.org/Aorimn/dislocker)
 
+## About this LTRData fork
+
+This is an LTRData fork of [Aorimn/dislocker](https://github.com/Aorimn/dislocker), with work to expose the BitLocker core as a native Windows DLL. The default branch, `master`, contains the upstream source through May 2023 plus the [October 2023 Windows build changes](https://github.com/LTRData/dislocker/commit/cc661f6e6bc96a093d1ee2f56f92b31e9e4571c3). It should not be assumed to track current upstream.
+
+### What differs here
+
+The local changes add [Visual Studio solution/project files](dislocker.sln), DLL import/export annotations on library APIs, Windows CRT file and console I/O, and explicit 64-bit offsets. They also adjust the dependency search paths for the local build environment.
+
+| Build path | Scope |
+| --- | --- |
+| [`dislocker.sln`](dislocker.sln) / [`dislocker.vcxproj`](dislocker.vcxproj) | Native DLL project with Debug/Release configurations for Win32, x64 and ARM64. It does not build the FUSE mount tool or the other command-line programs described below. |
+| [CMake build](src/CMakeLists.txt) and [`INSTALL.md`](INSTALL.md) | Inherited Unix/FUSE library and tool build. The Windows changes and missing files described below mean these instructions do not establish that this fork builds unchanged on Linux, macOS or FreeBSD. |
+
+### Build requirements and limitations
+
+To inspect or work on this fork:
+
+```sh
+git clone --branch master https://github.com/LTRData/dislocker.git
+cd dislocker
+```
+
+The Windows project selects `v120` for Win32/x64 and `WindowsApplicationForDrivers10.0` for ARM64, and links `mbedcrypto.lib`. Review [`dislocker.props`](dislocker.props) and the project configuration before building: they refer to an external PolarSSL/mbedTLS tree, local include directories and an external `getopt.c`. These dependencies and paths must be supplied or adapted for your environment.
+
+**The checked-in build inputs are incomplete.** The Windows change removed `include/dislocker/ssl_bindings.h.in`, but CMake still tries to generate `ssl_bindings.h` from it. The generated header is also absent from the repository, while encryption sources still include it. A clean checkout therefore needs this dependency resolved before either build route can be used. The source also contains Windows-specific declarations and CRT calls without platform guards; restoring the template alone would not establish Unix build compatibility.
+
+The inherited [installation guide](INSTALL.md) describes upstream's historical Unix build and dependencies. Its statement that Windows is unsupported predates this fork's DLL work; the DLL project does not provide Windows FUSE mounting. Likewise, the upstream platform and encryption feature descriptions below are not a record of testing of this Windows DLL.
+
+Licensing and copyright notices are in [LICENSE.txt](LICENSE.txt) and the individual source files.
+
+## Inherited upstream documentation
+
+The remainder of this README preserves upstream's usage explanations, including the distinction between the writable FUSE view and a separately decrypted file. The Travis badge above, bug-reporting links and contact details below belong to upstream Aorimn/dislocker.
+
+---
+
 ## Introduction and explanations
 
 This software has been designed to read BitLocker encrypted partitions under a
